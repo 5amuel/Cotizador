@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import styled from '@emotion/styled';
+import { obtenerDiferenciaYear } from '../helper';
 
 const Campo = styled.div `
     display:flex;
@@ -39,6 +40,16 @@ const Boton = styled.button `
         background-color: #26C6DA;
     }
 `;
+
+const Error = styled.div `
+    background-color: #ff8f87;
+    color: white;
+    padding: 1rem;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 2rem;
+`;
+
 const Formulario = () => {
 
     const [datos, guardarDatos] = useState ({
@@ -47,11 +58,12 @@ const Formulario = () => {
         plan: ''
     });
 
+    const[error, guardarError] = useState(false);
+
     // extrar los valores del state
     const {marca, year, plan} = datos;
 
     //leer los datos del formulario y colocarlos en el state
-
     const obtenerInformacion = e => {
         guardarDatos({
             ...datos,
@@ -60,8 +72,40 @@ const Formulario = () => {
 
     }
 
+    const cotizarSeguro = e => {
+        e.preventDefault();
+        if(marca.trim() === '' || year.trim() === '' || plan.trim() === ''){
+            guardarError(true);
+            return;
+        }
+        guardarError(false);
+
+        // Establecer precio base del seguro
+        let resultado = 2000;
+
+        //obtener la diferencia de años
+        const diferencia = obtenerDiferenciaYear(year);
+
+
+        //por cada año se resta 3%
+        resultado -= ((diferencia * 3) * resultado) / 100;
+        console.log(resultado);
+
+        // Americano 15%
+        // Asiatico 5%
+        // Europeo 30%
+
+        // Basico aumenta 20%
+
+        // Completo 50%
+
+    }
+
     return ( 
-        <form>
+        <form
+            onSubmit={cotizarSeguro}
+        >
+            {error ? <Error>Todos los campos son obligatorios</Error> : null}
             <Campo>
                 <Label>Marca </Label>
                 <Select
@@ -112,7 +156,7 @@ const Formulario = () => {
                     onChange={obtenerInformacion}
                 /> Completo
             </Campo>
-            <Boton type="button">Cotizar</Boton>
+            <Boton type="submit">Cotizar</Boton>
         </form>
      );
 }
